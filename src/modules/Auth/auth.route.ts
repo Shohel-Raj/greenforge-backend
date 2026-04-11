@@ -14,6 +14,8 @@ router.get("/me", verifyAuthToken(Role.ADMIN,Role.MEMBER), AuthController.getMe)
 
 router.post("/change-password", verifyAuthToken(Role.ADMIN,Role.MEMBER), AuthController.changePassword)
 router.post("/logout", verifyAuthToken(Role.ADMIN,Role.MEMBER), AuthController.logoutUser)
+router.post("/refresh-token", AuthController.getNewToken)
+
 
 
 export const AuthRoutes = router;

@@ -10,6 +10,9 @@ import {
   IRequestUser,
 } from "./auth.interface";
 import { UserStatus } from "../../generated/prisma/enums";
+import { jwtUtils } from "../../utils/jwt";
+import { envFile } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 
 const registerMember = async (payload: IRegistermemberPayload) => {
   const { name, email, password } = payload;
@@ -217,6 +220,68 @@ const logoutUser = async (sessionToken : string) => {
     return result;
 }
 
+const getNewToken = async (refreshToken : string, sessionToken : string) => {
+
+    const isSessionTokenExists = await prisma.session.findUnique({
+        where : {
+            token : sessionToken,
+        },
+        include : {
+            user : true,
+        }
+    })
+
+    if(!isSessionTokenExists){
+        throw new AppError(status.UNAUTHORIZED, "Invalid session token");
+    }
+
+    const verifiedRefreshToken = jwtUtils.verifyToken(refreshToken, envFile.REFRESH_TOKEN_SECRET)
+
+
+    if(!verifiedRefreshToken.success && verifiedRefreshToken.error){
+        throw new AppError(status.UNAUTHORIZED, "Invalid refresh token");
+    }
+
+    const data = verifiedRefreshToken.data as JwtPayload;
+
+    const newAccessToken = tokenUtils.getAccessToken({
+        userId: data.userId,
+        role: data.role,
+        name: data.name,
+        email: data.email,
+        status: data.status,
+        isDeleted: data.isDeleted,
+        emailVerified: data.emailVerified,
+    });
+
+    const newRefreshToken = tokenUtils.getRefreshToken({
+        userId: data.userId,
+        role: data.role,
+        name: data.name,
+        email: data.email,
+        status: data.status,
+        isDeleted: data.isDeleted,
+        emailVerified: data.emailVerified,
+    });
+
+    const {token} = await prisma.session.update({
+        where : {
+            token : sessionToken
+        },
+        data : {
+            token : sessionToken,
+            expiresAt: new Date(Date.now() + 60 * 60 * 60 * 24 * 1000),
+            updatedAt: new Date(),
+        }
+    })
+
+    return {
+        accessToken : newAccessToken,
+        refreshToken : newRefreshToken,
+        sessionToken : token,
+    }
+
+}
 
 
 
@@ -227,5 +292,6 @@ export const AuthService = {
   verifyEmail,
   getMe,
   logoutUser,
-  changePassword
+  changePassword,
+  getNewToken
 };
