@@ -12,5 +12,8 @@ router.post("/login", AuthController.loginUser)
 router.post("/verify-email", AuthController.verifyEmail)
 router.get("/me", verifyAuthToken(Role.ADMIN,Role.MEMBER), AuthController.getMe)
 
+router.post("/change-password", verifyAuthToken(Role.ADMIN,Role.MEMBER), AuthController.changePassword)
+router.post("/logout", verifyAuthToken(Role.ADMIN,Role.MEMBER), AuthController.logoutUser)
+
 
 export const AuthRoutes = router;
