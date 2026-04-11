@@ -3,7 +3,11 @@ import { auth } from "../../lib/auth";
 import AppError from "../../errors/AppError";
 import { prisma } from "../../lib/prisma";
 import { tokenUtils } from "../../utils/token";
-import { ILoginUserPayload, IRegistermemberPayload } from "./auth.interface";
+import {
+  ILoginUserPayload,
+  IRegistermemberPayload,
+  IRequestUser,
+} from "./auth.interface";
 import { UserStatus } from "../../generated/prisma/enums";
 
 const registerMember = async (payload: IRegistermemberPayload) => {
@@ -18,10 +22,8 @@ const registerMember = async (payload: IRegistermemberPayload) => {
   });
 
   if (!data.user) {
-
     throw new AppError(status.BAD_REQUEST, "Failed to register member");
   }
-
 
   try {
     const member = await prisma.$transaction(async (tx) => {
@@ -62,7 +64,7 @@ const registerMember = async (payload: IRegistermemberPayload) => {
     };
   } catch (error) {
     console.log("Transaction error : ", error);
-    
+
     await prisma.user.delete({
       where: {
         id: data.user.id,
@@ -73,70 +75,88 @@ const registerMember = async (payload: IRegistermemberPayload) => {
 };
 
 const loginUser = async (payload: ILoginUserPayload) => {
-    const { email, password } = payload;
+  const { email, password } = payload;
 
-    const data = await auth.api.signInEmail({
-        body: {
-            email,
-            password,
-        }
-    })
+  const data = await auth.api.signInEmail({
+    body: {
+      email,
+      password,
+    },
+  });
 
-    if (data.user.status === UserStatus.BLOCKED) {
-        throw new AppError(status.FORBIDDEN, "User is blocked");
-    }
+  if (data.user.status === UserStatus.BLOCKED) {
+    throw new AppError(status.FORBIDDEN, "User is blocked");
+  }
 
-    if (data.user.status === UserStatus.DELETED) {
-        throw new AppError(status.NOT_FOUND, "User is deleted");
-    }
+  if (data.user.status === UserStatus.DELETED) {
+    throw new AppError(status.NOT_FOUND, "User is deleted");
+  }
 
-    const accessToken = tokenUtils.getAccessToken({
-        userId: data.user.id,
-        role: data.user.role,
-        name: data.user.name,
-        email: data.user.email,
-        status: data.user.status,
-        emailVerified: data.user.emailVerified,
+  const accessToken = tokenUtils.getAccessToken({
+    userId: data.user.id,
+    role: data.user.role,
+    name: data.user.name,
+    email: data.user.email,
+    status: data.user.status,
+    emailVerified: data.user.emailVerified,
+  });
+
+  const refreshToken = tokenUtils.getRefreshToken({
+    userId: data.user.id,
+    role: data.user.role,
+    name: data.user.name,
+    email: data.user.email,
+    status: data.user.status,
+    emailVerified: data.user.emailVerified,
+  });
+
+  return {
+    ...data,
+    accessToken,
+    refreshToken,
+  };
+};
+const verifyEmail = async (email: string, otp: string) => {
+  const result = await auth.api.verifyEmailOTP({
+    body: {
+      email,
+      otp,
+    },
+  });
+
+  if (result.status && !result.user.emailVerified) {
+    await prisma.user.update({
+      where: {
+        email,
+      },
+      data: {
+        emailVerified: true,
+      },
     });
+  }
+};
 
-    const refreshToken = tokenUtils.getRefreshToken({
-        userId: data.user.id,
-        role: data.user.role,
-        name: data.user.name,
-        email: data.user.email,
-        status: data.user.status,
-        emailVerified: data.user.emailVerified,
-    });
+const getMe = async (user: IRequestUser) => {
+  const isUserExists = await prisma.user.findUnique({
+    where: {
+      id: user.userId,
+    },
+    include: {
+      member: true,
+      admin: true,
+    },
+  });
 
-    return {
-        ...data,
-        accessToken,
-        refreshToken,
-    };
+  if (!isUserExists) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
 
-}
-const verifyEmail = async (email : string, otp : string) => {
+  return isUserExists;
+};
 
-    const result = await auth.api.verifyEmailOTP({
-        body:{
-            email,
-            otp,
-        }
-    })
-
-    if(result.status && !result.user.emailVerified){
-        await prisma.user.update({
-            where : {
-                email,
-            },
-            data : {
-                emailVerified: true,
-            }
-        })
-    }
-}
 export const AuthService = {
   registerMember,
   loginUser,
-  verifyEmail
+  verifyEmail,
+  getMe,
 };
