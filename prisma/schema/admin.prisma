@@ -1,0 +1,17 @@
+model Admin {
+    id            String    @id @default(uuid(7))
+    name          String
+    email         String    @unique
+    profilePhoto  String?
+    contactNumber String?
+    createdAt     DateTime  @default(now())
+    gender        Gender
+    updatedAt     DateTime  @updatedAt
+
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([email])
+    @@map("admins")
+}

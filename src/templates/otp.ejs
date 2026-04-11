@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OTP Verification - GreenForge</title>
+</head>
+
+<body style="margin:0; padding:0; background:#f4f7f5; font-family:Arial, sans-serif;">
+
+  <!-- Container -->
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:40px 0;">
+    <tr>
+      <td align="center">
+
+        <!-- Card -->
+        <table role="presentation" width="100%" max-width="480" style="background:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg, #1b5e20, #43a047); padding:24px; text-align:center;">
+              <h1 style="margin:0; color:#ffffff; font-size:22px; letter-spacing:1px;">
+                GreenForge
+              </h1>
+              <p style="margin:6px 0 0; color:#d7f5dc; font-size:13px;">
+                Secure Verification System
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:32px 28px; text-align:center;">
+
+              <h2 style="margin:0 0 10px; color:#222; font-size:20px;">
+                Hello <span style="color:#2e7d32;"><%= name %></span>
+              </h2>
+
+              <p style="color:#555; font-size:14px; margin-bottom:24px;">
+                Use the OTP below to complete your verification. This code is valid for <b>2 minutes</b>.
+              </p>
+
+              <!-- OTP Box -->
+              <div style="display:inline-block; padding:16px 28px; font-size:26px; letter-spacing:6px; font-weight:bold; color:#1b5e20; background:#e8f5e9; border:2px dashed #66bb6a; border-radius:10px;">
+                <%= otp %>
+              </div>
+
+              <p style="margin-top:24px; font-size:12px; color:#888;">
+                If you didn’t request this code, you can safely ignore this email.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f1f8f4; text-align:center; padding:16px;">
+              <p style="margin:0; font-size:12px; color:#666;">
+                © <%= new Date().getFullYear() %> GreenForge. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
