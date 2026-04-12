@@ -1,3 +1,3 @@
-export const AuthSearchableFields = [
+export const AdminSearchableFields = [
     // Add searchable fields here
     ];
