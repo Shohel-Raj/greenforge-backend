@@ -9,6 +9,7 @@ model Idea {
 
   isPaid Boolean @default(false)
   price  Float?
+  isDeleted Boolean @default(false)
 
   status IdeaStatus @default(UNDER_REVIEW)
   feedback String?
