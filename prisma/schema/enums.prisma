@@ -14,3 +14,20 @@ enum Gender {
   FEMALE
   OTHER
 }
+enum IdeaStatus {
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  DRAFT
+}
+
+enum VoteType {
+  UP
+  DOWN
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}

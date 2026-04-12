@@ -8,12 +8,17 @@ model User {
   accounts      Account[]
   role          Role       @default(MEMBER)
   status        UserStatus @default(ACTIVE)
-  member        member?
-  admin         Admin?
+  member        member? 
+  admin         Admin? 
 
+  votes     Vote[]
+  comments  Comment[]
+  payments  Payment[]
+  watchlist Watchlist[]
+  catagory  Category[]
 
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([email])
   @@map("user")

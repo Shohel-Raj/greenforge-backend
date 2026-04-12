@@ -1,0 +1,23 @@
+model Comment {
+  id String @id @default(uuid(7))
+
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  rating Int
+
+  // relations
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  ideaId String
+  idea   Idea @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+
+  // nested comment
+  parentId String?
+  parent   Comment?  @relation("CommentToReply", fields: [parentId], references: [id])
+  replies  Comment[] @relation("CommentToReply")
+
+  @@map("comments")
+}

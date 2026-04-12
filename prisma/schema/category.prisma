@@ -1,0 +1,15 @@
+model Category {
+  id   String @id @default(uuid(7))
+  name String @unique
+
+  createdAt DateTime @default(now())
+
+  // relations
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // relations
+  ideas Idea[]
+
+  @@map("categories")
+}

@@ -1,0 +1,16 @@
+model Vote {
+  id String @id @default(uuid(7))
+
+  type VoteType
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  ideaId String
+  idea   Idea @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, ideaId]) // one vote per user per idea
+  @@map("votes")
+}

@@ -1,0 +1,20 @@
+model Payment {
+  id String @id @default(uuid(7))
+
+  amount Float
+  status PaymentStatus
+
+  transactionId String @unique
+
+  createdAt DateTime @default(now())
+
+  // relations
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+
+  ideaId String
+  idea   Idea @relation(fields: [ideaId], references: [id])
+
+  @@unique([userId, ideaId]) // user buys once per idea
+  @@map("payments")
+}
