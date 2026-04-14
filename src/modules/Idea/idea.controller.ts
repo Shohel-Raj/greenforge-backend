@@ -7,7 +7,7 @@ import { IQueryParams } from "../../interfaces/query.interface";
 
 const createIdea = nextRes(async (req: Request, res: Response) => {
   const user = req.user;
-  const payload = req.body;
+  const payload = { ...req.body, image: req?.file?.path };
 
   const result = await IdeaService.createIdea(payload, user.userId);
 
@@ -21,7 +21,7 @@ const createIdea = nextRes(async (req: Request, res: Response) => {
 
 const getAllIdeas = nextRes(async (req: Request, res: Response) => {
   const result = await IdeaService.getAllIdeas(req.query as IQueryParams);
-console.log(result)
+
   sendResponse(res, {
     httpStatusCode: status.OK,
     success: true,
@@ -46,9 +46,9 @@ const getSingleIdea = nextRes(async (req: Request, res: Response) => {
 const updateIdea = nextRes(async (req: Request, res: Response) => {
   const { id } = req.params;
   const payload = req.body;
-  const user=req.user;
+  const user = req.user;
 
-  const result = await IdeaService.updateIdea(id as string, payload,user);
+  const result = await IdeaService.updateIdea(id as string, payload, user);
 
   sendResponse(res, {
     httpStatusCode: status.OK,
@@ -62,7 +62,7 @@ const deleteIdea = nextRes(async (req: Request, res: Response) => {
   const { id } = req.params;
   const user = req.user;
 
-  const result = await IdeaService.deleteIdea(id as string,user);
+  const result = await IdeaService.deleteIdea(id as string, user);
 
   sendResponse(res, {
     httpStatusCode: status.OK,

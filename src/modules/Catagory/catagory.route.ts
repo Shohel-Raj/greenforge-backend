@@ -14,8 +14,7 @@ router.use(verifyAuthToken(Role.MEMBER));
 
 // Create
 router.post(
-  "/create",
-  validateRequest(createCategoryValidation),
+  "/create",validateRequest(createCategoryValidation),  
   CategoryController.createCategory
 );
 

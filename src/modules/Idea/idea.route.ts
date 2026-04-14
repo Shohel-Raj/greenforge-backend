@@ -4,12 +4,14 @@ import { createIdeaValidation, updateIdeaValidation } from "./idea.validation";
 import { verifyAuthToken } from "../../middlewares/authVerify";
 import { Role } from "../../generated/prisma/enums";
 import { validateRequest } from "../../middlewares/validateRequest";
+import { multerUpload } from "../../config/multer.config";
 
 const router = express.Router();
 
 router.post(
   "/",
   verifyAuthToken(Role.MEMBER),
+  multerUpload.single("file"),
   validateRequest(createIdeaValidation),
   IdeaController.createIdea
 );
