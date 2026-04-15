@@ -27,13 +27,18 @@ const getAllIdeas = async (query: IQueryParams) => {
   const result = await queryBuilder
     .search()
     .filter()
-    // .where({
-    //   // only approved ideas for public
-    //   status: IdeaStatus.APPROVED,
-    // })
+    .where({
+      // only approved ideas for public
+      status: IdeaStatus.APPROVED,
+    })
     .include({
       category: true,
       member: true,
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
     })
     .dynamicInclude(ideaIncludeConfig)
     .paginate()
@@ -44,21 +49,28 @@ const getAllIdeas = async (query: IQueryParams) => {
   return result;
 };
 
-// ✅ GET SINGLE IDEA
 const getIdeaById = async (id: string) => {
   const idea = await prisma.idea.findUnique({
-    where: {
-      id,
-    },
+    where: { id },
     include: {
       category: true,
       member: true,
       votes: true,
-      payments: false,
+
       comments: {
+        where: {
+          parentId: null, // ✅ only root comments
+        },
         include: {
           user: true,
-          replies: true,
+          _count: {
+            select: {
+              replies: true, // ✅ reply count only
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       },
     },
@@ -93,7 +105,11 @@ const createIdea = async (payload: any, userId: string) => {
 };
 
 // ✅ UPDATE IDEA
-const updateIdea = async (id: string, payload: TUpdateIdea,user:IRequestUser) => {
+const updateIdea = async (
+  id: string,
+  payload: TUpdateIdea,
+  user: IRequestUser,
+) => {
   const isIdeaExist = await prisma.idea.findUnique({
     where: { id },
   });
@@ -101,11 +117,11 @@ const updateIdea = async (id: string, payload: TUpdateIdea,user:IRequestUser) =>
   if (!isIdeaExist) {
     throw new AppError(status.NOT_FOUND, "Idea not found");
   }
-  const member= await prisma.member.findUnique({
-  where:{
-    id:isIdeaExist?.memberId
-  }
-})
+  const member = await prisma.member.findUnique({
+    where: {
+      id: isIdeaExist?.memberId,
+    },
+  });
   const isOwner = member?.userId === user.userId;
   const isAdmin = user.role === Role.ADMIN;
   if (!isOwner && !isAdmin) {
@@ -127,17 +143,16 @@ const updateIdea = async (id: string, payload: TUpdateIdea,user:IRequestUser) =>
 const deleteIdea = async (id: string, user: IRequestUser) => {
   const isIdeaExist = await prisma.idea.findUnique({
     where: { id },
-    
   });
-const member= await prisma.member.findUnique({
-  where:{
-    id:isIdeaExist?.memberId
-  }
-})
+  const member = await prisma.member.findUnique({
+    where: {
+      id: isIdeaExist?.memberId,
+    },
+  });
   if (!isIdeaExist) {
     throw new AppError(status.NOT_FOUND, "Idea not found");
   }
-   
+
   const isOwner = member?.userId === user.userId;
   const isAdmin = user.role === Role.ADMIN;
 
