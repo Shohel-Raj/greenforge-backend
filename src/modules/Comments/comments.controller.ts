@@ -33,8 +33,27 @@ const getReplies = nextRes(async (req: Request, res: Response) => {
   });
 });
 
+const updateComment = nextRes(async (req: Request, res: Response) => {
+  const user = req.user;
+  const { id } = req.params;
+
+  const result = await CommentService.updateComment(
+    id as string,
+    req.body,
+    user.userId
+  );
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Comment updated successfully",
+    data: result,
+  });
+});
+
 
 export const CommentController = {
   createComment,
-  getReplies
+  getReplies,
+  updateComment
 };

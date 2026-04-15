@@ -50,7 +50,28 @@ const getReplies = async (parentId: string) => {
   return replies;
 };
 
+// ✅ UPDATE COMMENT
+const updateComment = async (id: string, payload: any, userId: string) => {
+  const comment = await prisma.comment.findUnique({
+    where: { id },
+  });
+
+  if (!comment) {
+    throw new AppError(status.NOT_FOUND, "Comment not found");
+  }
+
+  if (comment.userId !== userId) {
+    throw new AppError(status.FORBIDDEN, "Not allowed");
+  }
+
+  return prisma.comment.update({
+    where: { id },
+    data: payload,
+  });
+};
+
 export const CommentService = {
   createComment,
-  getReplies
+  getReplies,
+  updateComment
 };
