@@ -69,9 +69,31 @@ const updateComment = async (id: string, payload: any, userId: string) => {
     data: payload,
   });
 };
+// ✅ DELETE COMMENT
+const deleteComment = async (id: string, userId: string) => {
+  const comment = await prisma.comment.findUnique({
+    where: { id },
+  });
+
+  if (!comment) {
+    throw new AppError(status.NOT_FOUND, "Comment not found");
+  }
+
+  if (comment.userId !== userId) {
+    throw new AppError(status.FORBIDDEN, "Not allowed");
+  }
+
+  await prisma.comment.delete({
+    where: { id },
+  });
+
+  return { message: "Comment deleted successfully" };
+};
+
 
 export const CommentService = {
   createComment,
   getReplies,
-  updateComment
+  updateComment,
+  deleteComment
 };

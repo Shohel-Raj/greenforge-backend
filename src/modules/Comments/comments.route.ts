@@ -22,6 +22,10 @@ router.patch(
   validateRequest(updateCommentValidation),
   CommentController.updateComment
 );
-
+router.delete(
+  "/:id",
+  verifyAuthToken(Role.MEMBER),
+  CommentController.deleteComment
+);
 
 export const CommentsRoutes = router;

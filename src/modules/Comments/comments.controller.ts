@@ -50,10 +50,23 @@ const updateComment = nextRes(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const deleteComment = nextRes(async (req: Request, res: Response) => {
+  const user = req.user;
+  const { id } = req.params;
 
+  const result = await CommentService.deleteComment(id as string, user.userId);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Comment deleted successfully",
+    data: result,
+  });
+});
 
 export const CommentController = {
   createComment,
   getReplies,
-  updateComment
+  updateComment,
+  deleteComment
 };
