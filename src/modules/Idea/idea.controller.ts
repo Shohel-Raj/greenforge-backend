@@ -26,7 +26,8 @@ const getAllIdeas = nextRes(async (req: Request, res: Response) => {
     httpStatusCode: status.OK,
     success: true,
     message: "Ideas fetched successfully",
-    data: result,
+    data: result.data,
+    meta: result.meta,
   });
 });
 

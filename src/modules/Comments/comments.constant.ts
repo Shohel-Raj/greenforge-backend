@@ -1,3 +1,3 @@
-export const CommentsSearchableFields = [
-    // Add searchable fields here
-    ];
+export const commentSearchableFields = ["content"];
+
+export const commentFilterableFields = ["searchTerm", "ideaId"];
