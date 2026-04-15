@@ -1,11 +1,12 @@
+
 model Comment {
   id String @id @default(uuid(7))
 
   content String
+  rating Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  rating Int
 
   // relations
   userId String
@@ -19,5 +20,8 @@ model Comment {
   parent   Comment?  @relation("CommentToReply", fields: [parentId], references: [id])
   replies  Comment[] @relation("CommentToReply")
 
+
+  @@index([ideaId])
+  @@index([parentId])
   @@map("comments")
 }
