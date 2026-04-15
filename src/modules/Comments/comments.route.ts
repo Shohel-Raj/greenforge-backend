@@ -14,4 +14,8 @@ router.post(
   validateRequest(createCommentValidation),
   CommentController.createComment
 );
+// load replies (on click)
+router.get("/replies/:parentId", CommentController.getReplies);
+
+
 export const CommentsRoutes = router;

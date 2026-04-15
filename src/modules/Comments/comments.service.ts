@@ -2,7 +2,7 @@ import status from "http-status";
 import AppError from "../../errors/AppError";
 import { prisma } from "../../lib/prisma";
 
-// ✅ CREATE COMMENT / REPLY
+// CREATE COMMENT / REPLY
 const createComment = async (payload: any, userId: string) => {
   const idea = await prisma.idea.findUnique({
     where: { id: payload.ideaId },
@@ -30,8 +30,27 @@ const createComment = async (payload: any, userId: string) => {
   return result;
 };
 
+// ✅ GET REPLIES (LOAD ON CLICK)
+const getReplies = async (parentId: string) => {
+  const replies = await prisma.comment.findMany({
+    where: { parentId },
+    include: {
+      user: true,
+      _count: {
+        select: {
+          replies: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
 
+  return replies;
+};
 
 export const CommentService = {
   createComment,
+  getReplies
 };

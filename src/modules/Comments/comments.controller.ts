@@ -20,6 +20,21 @@ const createComment = nextRes(async (req: Request, res: Response) => {
   });
 });
 
+const getReplies = nextRes(async (req: Request, res: Response) => {
+  const { parentId } = req.params;
+
+  const result = await CommentService.getReplies(parentId as string);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Replies fetched successfully",
+    data: result,
+  });
+});
+
+
 export const CommentController = {
   createComment,
+  getReplies
 };
