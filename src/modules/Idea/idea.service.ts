@@ -11,7 +11,6 @@ import {
   ideaSearchableFields,
 } from "./idea.constant";
 import { IRequestUser } from "../Auth/auth.interface";
-import { includes } from "zod";
 
 // ✅ GET ALL IDEAS
 const getAllIdeas = async (query: IQueryParams) => {
@@ -24,29 +23,66 @@ const getAllIdeas = async (query: IQueryParams) => {
     filterableFields: ideaFilterableFields,
   });
 
-  const result = await queryBuilder
+  const ideas = await queryBuilder
     .search()
     .filter()
     .where({
-      // only approved ideas for public
       status: IdeaStatus.APPROVED,
     })
     .include({
-      category: true,
-      member: true,
+      category: {
+        select: {
+          name: true,
+        },
+      },
+      member: {
+        select:{
+          id:true,
+          name:true,
+          profilePhoto:true,
+          userId:true
+        }
+      },
+      votes: {
+        select: {
+          type: true,
+        },
+      },
       _count: {
         select: {
           comments: true,
         },
       },
     })
-    .dynamicInclude(ideaIncludeConfig)
     .paginate()
     .sort()
     .fields()
     .execute();
 
-  return result;
+  // 🔥 transform votes → counts
+  const result = ideas.data.map((idea: any) => {
+    let upvotes = 0;
+    let downvotes = 0;
+
+    idea.votes.forEach((v: any) => {
+      if (v.type === "UP") upvotes++;
+      if (v.type === "DOWN") downvotes++;
+    });
+
+    return {
+      ...idea,
+      voteSummary: {
+        upvotes,
+        downvotes,
+      },
+      votes: undefined, // remove raw votes
+    };
+  });
+
+  return {
+    ...ideas,
+    data: result,
+  };
 };
 
 const getIdeaById = async (id: string) => {
@@ -55,17 +91,23 @@ const getIdeaById = async (id: string) => {
     include: {
       category: true,
       member: true,
-      votes: true,
 
       comments: {
         where: {
-          parentId: null, // ✅ only root comments
+          parentId: null,
         },
         include: {
-          user: true,
+          user: {
+            select:{
+              id:true,
+              name:true,
+              image:true,
+              role:true,
+            }
+          },
           _count: {
             select: {
-              replies: true, // ✅ reply count only
+              replies: true,
             },
           },
         },
@@ -80,7 +122,22 @@ const getIdeaById = async (id: string) => {
     throw new AppError(status.NOT_FOUND, "Idea not found");
   }
 
-  return idea;
+  // 🔥 vote summary
+  const upvotes = await prisma.vote.count({
+    where: { ideaId: id, type: "UP" },
+  });
+
+  const downvotes = await prisma.vote.count({
+    where: { ideaId: id, type: "DOWN" },
+  });
+
+  return {
+    ...idea,
+    voteSummary: {
+      upvotes,
+      downvotes,
+    },
+  };
 };
 
 // ✅ CREATE IDEA
