@@ -18,7 +18,8 @@ router.post(
 
 router.get("/", IdeaController.getAllIdeas);
 
-router.get("/:id", IdeaController.getSingleIdea);
+router.get("/:id",  verifyAuthToken(Role.MEMBER, Role.ADMIN),
+ IdeaController.getSingleIdea);
 
 router.patch("/:id",
   verifyAuthToken(Role.MEMBER, Role.ADMIN),

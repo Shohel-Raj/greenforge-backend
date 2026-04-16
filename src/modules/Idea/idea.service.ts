@@ -3,7 +3,13 @@ import { IQueryParams } from "../../interfaces/query.interface";
 import { prisma } from "../../lib/prisma";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { TUpdateIdea } from "./idea.interface";
-import { Idea, IdeaStatus, Prisma, Role } from "../../generated/prisma/client";
+import {
+  Idea,
+  IdeaStatus,
+  PaymentStatus,
+  Prisma,
+  Role,
+} from "../../generated/prisma/client";
 import AppError from "../../errors/AppError";
 import {
   ideaFilterableFields,
@@ -36,12 +42,12 @@ const getAllIdeas = async (query: IQueryParams) => {
         },
       },
       member: {
-        select:{
-          id:true,
-          name:true,
-          profilePhoto:true,
-          userId:true
-        }
+        select: {
+          id: true,
+          name: true,
+          profilePhoto: true,
+          userId: true,
+        },
       },
       votes: {
         select: {
@@ -85,7 +91,7 @@ const getAllIdeas = async (query: IQueryParams) => {
   };
 };
 
-const getIdeaById = async (id: string) => {
+const getIdeaById = async (id: string, user: IRequestUser) => {
   const idea = await prisma.idea.findUnique({
     where: { id },
     include: {
@@ -98,12 +104,12 @@ const getIdeaById = async (id: string) => {
         },
         include: {
           user: {
-            select:{
-              id:true,
-              name:true,
-              image:true,
-              role:true,
-            }
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              role: true,
+            },
           },
           _count: {
             select: {
@@ -122,7 +128,51 @@ const getIdeaById = async (id: string) => {
     throw new AppError(status.NOT_FOUND, "Idea not found");
   }
 
-  // 🔥 vote summary
+  /**
+   * 🔐 ACCESS CONTROL LOGIC
+   */
+  let hasAccess = true;
+  if (idea.isPaid) {
+    const currentMember = await prisma.member.findUnique({
+      where: {
+        id: idea.memberId,
+      },
+    });
+    // ✅ Owner can always access
+    const isOwner = currentMember?.userId === user.userId;
+    const isAdmin = user.role === Role.ADMIN;
+
+    if (!isOwner || !isAdmin) {
+      // ✅ Check payment
+      const payment = await prisma.payment.findFirst({
+        where: {
+          ideaId: id,
+          userId: user?.userId,
+          status: PaymentStatus.SUCCESS,
+        },
+      });
+
+      hasAccess = !!payment;
+    }
+  }
+
+  // ❌ Block access if not paid
+  if (idea.isPaid && !hasAccess) {
+    return {
+      id: idea.id,
+      title: idea.title,
+      image: idea.image,
+      price: idea.price,
+      isPaid: idea.isPaid,
+
+      message: "This is a paid idea. Please purchase to access full content.",
+      locked: true,
+    };
+  }
+
+  /**
+   * 🔥 Vote summary
+   */
   const upvotes = await prisma.vote.count({
     where: { ideaId: id, type: "UP" },
   });
@@ -133,6 +183,7 @@ const getIdeaById = async (id: string) => {
 
   return {
     ...idea,
+    locked: false,
     voteSummary: {
       upvotes,
       downvotes,

@@ -2,19 +2,24 @@ model Payment {
   id String @id @default(uuid(7))
 
   amount Float
-  status PaymentStatus
+  status PaymentStatus @default(PENDING)
 
-  transactionId String @unique
+  transactionId      String   @unique
+  stripeEventId      String?  @unique
+  paymentGatewayData Json?
+  updatedAt          DateTime @updatedAt
 
   createdAt DateTime @default(now())
 
   // relations
   userId String
-  user   User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   ideaId String
-  idea   Idea @relation(fields: [ideaId], references: [id])
+  idea   Idea   @relation(fields: [ideaId], references: [id])
 
   @@unique([userId, ideaId]) // user buys once per idea
+  @@index([ideaId])
+  @@index([transactionId])
   @@map("payments")
 }

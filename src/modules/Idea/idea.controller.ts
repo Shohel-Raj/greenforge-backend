@@ -33,8 +33,9 @@ const getAllIdeas = nextRes(async (req: Request, res: Response) => {
 
 const getSingleIdea = nextRes(async (req: Request, res: Response) => {
   const { id } = req.params;
+  const user = req.user;
 
-  const result = await IdeaService.getIdeaById(id as string);
+  const result = await IdeaService.getIdeaById(id as string,user);
 
   sendResponse(res, {
     httpStatusCode: status.OK,
