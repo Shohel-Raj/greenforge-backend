@@ -1,6 +1,7 @@
-import { MAX_UPLOAD_SIZE } from '../../constants';
-// import { z } from 'zod';
+import { z } from "zod";
+import { voteTypes } from "./vote.constant";
 
-export const voteValidationSchema = {
-    // Add validation schemas here
-    };
+export const voteValidation = z.object({
+    ideaId: z.string(),
+    type: z.enum(voteTypes),
+});

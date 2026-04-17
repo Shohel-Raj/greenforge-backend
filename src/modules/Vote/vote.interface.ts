@@ -1,3 +1,6 @@
-export type TVote = {
-    // Add interface properties here
-    };
+import { VoteType } from "../../generated/prisma/enums";
+
+export type TVotePayload = {
+  ideaId: string;
+  type: VoteType
+};

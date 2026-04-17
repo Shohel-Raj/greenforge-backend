@@ -1,3 +1,1 @@
-export const VoteSearchableFields = [
-    // Add searchable fields here
-    ];
+export const voteTypes = ["UP", "DOWN"] as const;
