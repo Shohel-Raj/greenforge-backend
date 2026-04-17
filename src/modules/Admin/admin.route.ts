@@ -52,5 +52,5 @@ router.get("/chart/ideas", AdminController.getIdeaChart);
 
 router.get("/chart/payments", AdminController.getPaymentChart);
 router.get("/chart/votes", AdminController.getVoteComparison);
-
+router.get("/ideas/latest", AdminController.getLatestIdeas);
 export const AdminRoutes = router;

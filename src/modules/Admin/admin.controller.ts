@@ -142,6 +142,21 @@ const getVoteComparison = nextRes(async (req, res) => {
   });
 });
 
+
+
+const getLatestIdeas = nextRes(async (req, res) => {
+  const limit = Number(req.query.limit) || 5;
+
+  const result = await AdminService.getLatestIdeas(limit);
+
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Latest ideas fetched",
+    data: result,
+  });
+});
+
 export const AdminController = {
   getAllUsers,
   updateUser,
@@ -153,5 +168,6 @@ export const AdminController = {
   getDashboardOverview,
   getIdeaChart,
   getPaymentChart,
-  getVoteComparison
+  getVoteComparison,
+  getLatestIdeas
 };

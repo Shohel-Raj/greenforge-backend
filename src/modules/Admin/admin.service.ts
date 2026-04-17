@@ -293,7 +293,54 @@ const getVoteComparison = async () => {
 };
 
 
+const getLatestIdeas = async (limit: number) => {
+  const ideas = await prisma.idea.findMany({
+    where: {
+      status: "APPROVED",
+    },
+    take: limit,
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      category: true,
+      member: true,
+      votes: {
+        select: {
+          type: true,
+        },
+      },
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
+    },
+  });
 
+  // 🔥 vote summary
+  const result = ideas.map((idea) => {
+    let upvotes = 0;
+    let downvotes = 0;
+
+    idea.votes.forEach((v) => {
+      if (v.type === "UP") upvotes++;
+      if (v.type === "DOWN") downvotes++;
+    });
+
+    return {
+      ...idea,
+      voteSummary: {
+        upvotes,
+        downvotes,
+        score: upvotes - downvotes,
+      },
+      votes: undefined,
+    };
+  });
+
+  return result;
+};
 
 
 export const AdminService = {
@@ -309,6 +356,7 @@ export const AdminService = {
   getDashboardOverview,
   getIdeaChart,
   getPaymentChart,
-  getVoteComparison
+  getVoteComparison,
+  getLatestIdeas
 
 };
