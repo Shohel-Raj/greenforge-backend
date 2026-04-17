@@ -2,8 +2,7 @@ import { z } from "zod";
 import { IdeaStatus, UserStatus } from "../../generated/prisma/enums";
 
 export const updateUserValidation = z.object({
-    role: z.enum(["ADMIN", "MEMBER"]).optional(),
-    status: z.enum([UserStatus.ACTIVE,UserStatus.BLOCKED,UserStatus.DELETED]).optional(),
+    status: z.enum([UserStatus.ACTIVE,UserStatus.BLOCKED,UserStatus.DELETED])
 });
 
 export const updateIdeaStatusValidation = z.object({

@@ -40,7 +40,27 @@ const getAllUsers = async (query: IQueryParams) => {
   return result;
 };
 
+// ✅ UPDATE USER
+const updateUser = async (id: string, payload: any) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+
+  const result = await prisma.user.update({
+    where: { id },
+    data: payload,
+  });
+
+  return result;
+};
+
+
 export const AdminService = {
   getAllUsers,
+  updateUser,
 
 };

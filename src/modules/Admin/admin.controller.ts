@@ -17,8 +17,22 @@ const getAllUsers = nextRes(async (req: Request, res: Response) => {
   });
 });
 
+const updateUser = nextRes(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await AdminService.updateUser(id as string, req.body);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "User updated successfully",
+    data: result,
+  });
+});
+
 
 export const AdminController = {
   getAllUsers,
+  updateUser,
 
 };
