@@ -30,9 +30,21 @@ const updateUser = nextRes(async (req: Request, res: Response) => {
   });
 });
 
+// IDEAS
+const getAllIdeasAdmin = nextRes(async (req: Request, res: Response) => {
+  const result = await AdminService.getAllIdeasAdmin(req.query as IQueryParams);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Ideas fetched successfully",
+    data: result,
+  });
+});
 
 export const AdminController = {
   getAllUsers,
   updateUser,
+  getAllIdeasAdmin,
 
 };

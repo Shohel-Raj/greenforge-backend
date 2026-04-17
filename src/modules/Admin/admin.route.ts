@@ -13,7 +13,7 @@ import { validateRequest } from "../../middlewares/validateRequest";
 const router = express.Router();
 
 // 🔒 all routes admin only
-// router.use(verifyAuthToken(Role.ADMIN));
+router.use(verifyAuthToken(Role.ADMIN));
 
 // USERS
 router.get("/users", AdminController.getAllUsers);
@@ -23,6 +23,9 @@ router.patch(
   validateRequest(updateUserValidation),
   AdminController.updateUser
 );
+
+// IDEAS
+router.get("/ideas", AdminController.getAllIdeasAdmin);
 
 
 export const AdminRoutes = router;
