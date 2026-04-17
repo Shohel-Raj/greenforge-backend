@@ -27,5 +27,21 @@ router.patch(
 // IDEAS
 router.get("/ideas", AdminController.getAllIdeasAdmin);
 
+router.patch(
+  "/ideas/:id/status",
+  validateRequest(updateIdeaStatusValidation),
+  AdminController.updateIdeaStatus
+);
+
+router.patch(
+  "/ideas/:id/feature",
+  validateRequest(featureIdeaValidation),
+  AdminController.featureIdea
+);
+
+router.delete("/ideas/:id", AdminController.deleteIdea);
+
+// COMMENTS
+router.delete("/comments/:id", AdminController.deleteComment);
 
 export const AdminRoutes = router;

@@ -120,10 +120,85 @@ const getAllIdeasAdmin = async (query: IQueryParams) => {
   };
 };
 
+// ✅ UPDATE IDEA STATUS
+const updateIdeaStatus = async (id: string, payload: any) => {
+  const idea = await prisma.idea.findUnique({
+    where: { id },
+  });
+
+  if (!idea) {
+    throw new AppError(status.NOT_FOUND, "Idea not found");
+  }
+
+  return prisma.idea.update({
+    where: { id },
+    data: {
+      status: payload.status,
+      feedback: payload.feedback,
+    },
+  });
+};
+
+// ✅ FEATURE IDEA
+const featureIdea = async (id: string, payload: any) => {
+  const idea = await prisma.idea.findUnique({
+    where: { id },
+  });
+
+  if (!idea) {
+    throw new AppError(status.NOT_FOUND, "Idea not found");
+  }
+
+  return prisma.idea.update({
+    where: { id },
+    data: {
+      isfeatures: payload.isfeatures,
+    },
+  });
+};
+
+// ✅ DELETE IDEA
+const deleteIdea = async (id: string) => {
+  const idea = await prisma.idea.findUnique({
+    where: { id },
+  });
+
+  if (!idea) {
+    throw new AppError(status.NOT_FOUND, "Idea not found");
+  }
+
+  await prisma.idea.delete({
+    where: { id },
+  });
+
+  return { message: "Idea deleted successfully" };
+};
+
+// ================= COMMENTS =================
+
+// ✅ DELETE COMMENT
+const deleteComment = async (id: string) => {
+  const comment = await prisma.comment.findUnique({
+    where: { id },
+  });
+
+  if (!comment) {
+    throw new AppError(status.NOT_FOUND, "Comment not found");
+  }
+
+  await prisma.comment.delete({
+    where: { id },
+  });
+
+  return { message: "Comment deleted successfully" };
+};
 
 export const AdminService = {
   getAllUsers,
   updateUser,
   getAllIdeasAdmin,
-
+  updateIdeaStatus,
+  featureIdea,
+  deleteIdea,
+  deleteComment,
 };

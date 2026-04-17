@@ -42,9 +42,63 @@ const getAllIdeasAdmin = nextRes(async (req: Request, res: Response) => {
   });
 });
 
+const updateIdeaStatus = nextRes(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await AdminService.updateIdeaStatus(id as string, req.body);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Idea status updated",
+    data: result,
+  });
+});
+
+const featureIdea = nextRes(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await AdminService.featureIdea(id as string, req.body);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Idea feature updated",
+    data: result,
+  });
+});
+
+const deleteIdea = nextRes(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await AdminService.deleteIdea(id as string);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: result.message,
+  });
+});
+
+// COMMENTS
+const deleteComment = nextRes(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await AdminService.deleteComment(id as string);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: result.message,
+  });
+});
+
 export const AdminController = {
   getAllUsers,
   updateUser,
   getAllIdeasAdmin,
-
+  updateIdeaStatus,
+  featureIdea,
+  deleteIdea,
+  deleteComment,
 };
