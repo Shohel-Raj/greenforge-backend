@@ -13,7 +13,6 @@ import {
 import AppError from "../../errors/AppError";
 import {
   ideaFilterableFields,
-  ideaIncludeConfig,
   ideaSearchableFields,
 } from "./idea.constant";
 import { IRequestUser } from "../Auth/auth.interface";

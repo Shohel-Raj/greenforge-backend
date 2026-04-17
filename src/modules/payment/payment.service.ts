@@ -1,141 +1,141 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Stripe from "stripe";
 import { prisma } from "../../lib/prisma";
+import { stripe } from "../../config/stripe.config";
 import { PaymentStatus } from "../../generated/prisma/enums";
+import { v7 as uuidv7 } from "uuid";
+import AppError from "../../errors/AppError";
+import status from "http-status";
 
-const handlerStripeWebhookEvent = async (event: Stripe.Event) => {
-  // 🔒 Idempotency check
-  const existingEvent = await prisma.payment.findFirst({
+const createCheckoutSession = async (userId: string, ideaId: string) => {
+  const idea = await prisma.idea.findUnique({
+    where: { id: ideaId },
+  });
+
+  if (!idea || !idea.isPaid || !idea.price) {
+    throw new AppError(status.NOT_FOUND, "Paid idea not found or invalid");
+  }
+
+  // 🔒 prevent duplicate purchase (SUCCESS only)
+  const existing = await prisma.payment.findFirst({
     where: {
-      stripeEventId: event.id,
+      userId,
+      ideaId,
+      status: PaymentStatus.SUCCESS,
     },
   });
 
-  if (existingEvent) {
-    console.log(`Event ${event.id} already processed`);
-    return { message: "Event already processed" };
+  if (existing) {
+    throw new AppError(status.BAD_REQUEST, "Already purchased");
   }
 
-  switch (event.type) {
-    /**
-     * =========================
-     * SUCCESS PAYMENT
-     * =========================
-     */
-    case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
+  const transactionId = String(uuidv7());
 
-      const ideaId = session.metadata?.ideaId;
-      const userId = session.metadata?.userId;
-      const transactionId = session.payment_intent as string;
+  /**
+   * 🔥 USE TRANSACTION
+   */
+  const session = await prisma.$transaction(async (tx) => {
+    // 1️⃣ Create pending payment
+    const payment = await tx.payment.create({
+      data: {
+        userId,
+        ideaId,
+        amount: idea.price!,
+        transactionId,
+        status: PaymentStatus.PENDING,
+      },
+    });
 
-      if (!ideaId || !userId || !transactionId) {
-        console.error("Missing metadata in Stripe session");
-        return { message: "Missing metadata" };
-      }
+    // 2️⃣ Create Stripe session
+    const stripeSession = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
 
-      // 🔒 Prevent duplicate purchase (your schema rule)
-      const existingPayment = await prisma.payment.findFirst({
-        where: {
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            unit_amount: Math.round(idea.price! * 120),
+            product_data: {
+              name: idea.title,
+            },
+          },
+          quantity: 1,
+        },
+      ],
+
+      success_url: `${process.env.CLIENT_URL}/payment-success`,
+      cancel_url: `${process.env.CLIENT_URL}/payment-cancel`,
+
+      /**
+       * 🔗 VERY IMPORTANT
+       */
+      metadata: {
+        userId,
+        ideaId,
+        paymentId: payment.id,
+        transactionId,
+      },
+
+      payment_intent_data: {
+        metadata: {
           userId,
           ideaId,
-        },
-      });
-
-      if (existingPayment?.status === PaymentStatus.SUCCESS) {
-        console.log("User already purchased this idea");
-        return { message: "Already purchased" };
-      }
-
-      await prisma.$transaction(async (tx) => {
-        await tx.payment.upsert({
-          where: {
-            transactionId,
-          },
-          update: {
-            status:
-              session.payment_status === "paid"
-                ? PaymentStatus.SUCCESS
-                : PaymentStatus.PENDING,
-            stripeEventId: event.id,
-            paymentGatewayData: session as any,
-          },
-          create: {
-            amount: (session.amount_total ?? 0) / 100,
-            status:
-              session.payment_status === "paid"
-                ? PaymentStatus.SUCCESS
-                : PaymentStatus.PENDING,
-            transactionId,
-            stripeEventId: event.id,
-            paymentGatewayData: session as any,
-            userId,
-            ideaId,
-          },
-        });
-      });
-
-      console.log(`Payment success for idea ${ideaId}`);
-      break;
-    }
-
-    /**
-     * =========================
-     * PAYMENT FAILED
-     * =========================
-     */
-    case "payment_intent.payment_failed": {
-      const intent = event.data.object as Stripe.PaymentIntent;
-
-      const transactionId = intent.id;
-
-      await prisma.payment.updateMany({
-        where: {
+          paymentId: payment.id,
           transactionId,
         },
-        data: {
-          status: PaymentStatus.FAILED,
-          stripeEventId: event.id,
-          paymentGatewayData: intent as any,
+      },
+    });
+
+    return stripeSession;
+  });
+
+  return session;
+};
+
+const getMyPayments = async (userId: string) => {
+  const payments = await prisma.payment.findMany({
+    where: {
+      userId,
+      status: "SUCCESS", // only successful purchases (you can remove if you want all)
+    },
+    include: {
+      idea: {
+        select: {
+          id: true,
+          title: true,
+          image: true,
+          price: true,
+          isPaid: true,
+
+          category: {
+            select: {
+              name: true,
+            },
+          },
+          member: {
+            select: {
+              id: true,
+              user: {
+                select: {
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
         },
-      });
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
-      console.log(`Payment failed: ${transactionId}`);
-      break;
-    }
-
-    /**
-     * =========================
-     * EXPIRED SESSION
-     * =========================
-     */
-    case "checkout.session.expired": {
-      const session = event.data.object as Stripe.Checkout.Session;
-
-      const transactionId = session.payment_intent as string;
-
-      await prisma.payment.updateMany({
-        where: {
-          transactionId,
-        },
-        data: {
-          status: PaymentStatus.FAILED,
-          stripeEventId: event.id,
-        },
-      });
-
-      console.log(`Session expired: ${session.id}`);
-      break;
-    }
-
-    default:
-      console.log(`Unhandled event type: ${event.type}`);
-      break;
-  }
-
-  return { message: `Processed event ${event.id}` };
+  return payments;
 };
 
 export const PaymentService = {
-  handlerStripeWebhookEvent,
+  createCheckoutSession,
+  getMyPayments,
 };

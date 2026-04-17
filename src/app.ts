@@ -6,7 +6,7 @@ import { notFound } from './middlewares/notFound';
 import cookieParser from "cookie-parser";
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './lib/auth';
-import { PaymentController } from './modules/payment/payment.controller';
+import { WebhookPaymentController } from './modules/strip-webhook/WEbhookPayment.controller';
 
 
 const app: Application = express();
@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
 
-app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent)
+app.post("/webhook", express.raw({ type: "application/json" }), WebhookPaymentController.handleStripeWebhookEvent)
 
 // application routes
 app.use('/api/v1', IndexRoutes);
