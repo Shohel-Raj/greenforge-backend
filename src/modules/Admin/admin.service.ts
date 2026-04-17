@@ -193,6 +193,89 @@ const deleteComment = async (id: string) => {
   return { message: "Comment deleted successfully" };
 };
 
+
+const getDashboardOverview = async () => {
+  const totalUsers = await prisma.user.count();
+
+  const totalIdeas = await prisma.idea.count();
+
+  const approvedIdeas = await prisma.idea.count({
+    where: { status: "APPROVED" },
+  });
+
+  const pendingIdeas = await prisma.idea.count({
+    where: { status: "UNDER_REVIEW" },
+  });
+
+  const rejectedIdeas = await prisma.idea.count({
+    where: { status: "REJECTED" },
+  });
+
+  const totalComments = await prisma.comment.count();
+
+  const totalRevenue = await prisma.payment.aggregate({
+    _sum: {
+      amount: true,
+    },
+  });
+
+  return {
+    totalUsers,
+    totalIdeas,
+    approvedIdeas,
+    pendingIdeas,
+    rejectedIdeas,
+    totalComments,
+    totalRevenue: totalRevenue._sum.amount || 0,
+  };
+};
+
+const getIdeaChart = async () => {
+  const ideas = await prisma.idea.findMany({
+    select: {
+      createdAt: true,
+    },
+  });
+
+  const monthlyData: any = {};
+
+  ideas.forEach((idea) => {
+    const month = new Date(idea.createdAt).toLocaleString("default", {
+      month: "short",
+    });
+
+    monthlyData[month] = (monthlyData[month] || 0) + 1;
+  });
+
+  return Object.keys(monthlyData).map((month) => ({
+    month,
+    ideas: monthlyData[month],
+  }));
+};
+const getPaymentChart = async () => {
+  const payments = await prisma.payment.findMany({
+    select: {
+      createdAt: true,
+      amount: true,
+    },
+  });
+
+  const monthlyRevenue: any = {};
+
+  payments.forEach((p) => {
+    const month = new Date(p.createdAt).toLocaleString("default", {
+      month: "short",
+    });
+
+    monthlyRevenue[month] =
+      (monthlyRevenue[month] || 0) + p.amount;
+  });
+
+  return Object.keys(monthlyRevenue).map((month) => ({
+    month,
+    revenue: monthlyRevenue[month],
+  }));
+};
 export const AdminService = {
   getAllUsers,
   updateUser,
@@ -201,4 +284,10 @@ export const AdminService = {
   featureIdea,
   deleteIdea,
   deleteComment,
+
+
+  getDashboardOverview,
+  getIdeaChart,
+  getPaymentChart
+
 };

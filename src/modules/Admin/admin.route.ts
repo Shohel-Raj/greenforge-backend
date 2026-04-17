@@ -44,4 +44,12 @@ router.delete("/ideas/:id", AdminController.deleteIdea);
 // COMMENTS
 router.delete("/comments/:id", AdminController.deleteComment);
 
+
+
+router.get("/overview", AdminController.getDashboardOverview);
+
+router.get("/chart/ideas", AdminController.getIdeaChart);
+
+router.get("/chart/payments", AdminController.getPaymentChart);
+
 export const AdminRoutes = router;

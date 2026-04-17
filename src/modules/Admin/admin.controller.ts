@@ -93,6 +93,44 @@ const deleteComment = nextRes(async (req: Request, res: Response) => {
   });
 });
 
+
+
+//====================  dashboard over view=======================
+
+
+const getDashboardOverview = nextRes(async (req, res) => {
+  const result = await AdminService.getDashboardOverview();
+
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Dashboard overview fetched",
+    data: result,
+  });
+});
+
+const getIdeaChart = nextRes(async (req, res) => {
+  const result = await AdminService.getIdeaChart();
+
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Idea chart data",
+    data: result,
+  });
+});
+
+const getPaymentChart = nextRes(async (req, res) => {
+  const result = await AdminService.getPaymentChart();
+
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Payment chart data",
+    data: result,
+  });
+});
+
 export const AdminController = {
   getAllUsers,
   updateUser,
@@ -101,4 +139,7 @@ export const AdminController = {
   featureIdea,
   deleteIdea,
   deleteComment,
+  getDashboardOverview,
+  getIdeaChart,
+  getPaymentChart
 };
