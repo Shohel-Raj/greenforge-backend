@@ -276,6 +276,26 @@ const getPaymentChart = async () => {
     revenue: monthlyRevenue[month],
   }));
 };
+
+const getVoteComparison = async () => {
+  const upvotes = await prisma.vote.count({
+    where: { type: "UP" },
+  });
+
+  const downvotes = await prisma.vote.count({
+    where: { type: "DOWN" },
+  });
+
+  return [
+    { name: "Upvotes", value: upvotes },
+    { name: "Downvotes", value: downvotes },
+  ];
+};
+
+
+
+
+
 export const AdminService = {
   getAllUsers,
   updateUser,
@@ -288,6 +308,7 @@ export const AdminService = {
 
   getDashboardOverview,
   getIdeaChart,
-  getPaymentChart
+  getPaymentChart,
+  getVoteComparison
 
 };

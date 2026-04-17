@@ -51,5 +51,6 @@ router.get("/overview", AdminController.getDashboardOverview);
 router.get("/chart/ideas", AdminController.getIdeaChart);
 
 router.get("/chart/payments", AdminController.getPaymentChart);
+router.get("/chart/votes", AdminController.getVoteComparison);
 
 export const AdminRoutes = router;

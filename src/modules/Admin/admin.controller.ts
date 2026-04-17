@@ -131,6 +131,17 @@ const getPaymentChart = nextRes(async (req, res) => {
   });
 });
 
+const getVoteComparison = nextRes(async (req, res) => {
+  const result = await AdminService.getVoteComparison();
+
+  sendResponse(res, {
+    httpStatusCode: 200,
+    success: true,
+    message: "Vote comparison fetched",
+    data: result,
+  });
+});
+
 export const AdminController = {
   getAllUsers,
   updateUser,
@@ -141,5 +152,6 @@ export const AdminController = {
   deleteComment,
   getDashboardOverview,
   getIdeaChart,
-  getPaymentChart
+  getPaymentChart,
+  getVoteComparison
 };
