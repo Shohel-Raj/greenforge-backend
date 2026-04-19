@@ -6,6 +6,7 @@ import { CommentsRoutes } from "../modules/Comments/comments.route";
 import { PaymentRoutes } from "../modules/payment/payment.route";
 import { AdminRoutes } from "../modules/Admin/admin.route";
 import { VoteRoutes } from "../modules/Vote/vote.route";
+import { WatchlistRoutes } from "../modules/Watchlist/watchlist.route";
 
 const router = Router();
 
@@ -25,6 +26,8 @@ router.use("/vote", VoteRoutes);
 router.use("/payment", PaymentRoutes);
 
 router.use("/admin", AdminRoutes);
+
+router.use("/watchlist", WatchlistRoutes);
 
 
 

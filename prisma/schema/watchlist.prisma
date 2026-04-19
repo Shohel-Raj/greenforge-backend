@@ -11,4 +11,5 @@ model Watchlist {
 
   @@unique([userId, ideaId])
   @@map("watchlist")
+  
 }
