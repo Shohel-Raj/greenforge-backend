@@ -15,5 +15,13 @@ router.post(
   WatchlistController.addToWatchlist
 );
 
+//  REMOVE
+router.delete(
+  "/:ideaId",
+  verifyAuthToken(Role.MEMBER),
+  WatchlistController.removeFromWatchlist
+);
+
+
 
 export const WatchlistRoutes = router;

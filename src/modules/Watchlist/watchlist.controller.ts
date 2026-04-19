@@ -23,7 +23,22 @@ const addToWatchlist = nextRes(async (req: Request, res: Response) => {
   });
 });
 
+//  REMOVE
+const removeFromWatchlist = nextRes(async (req: Request, res: Response) => {
+  const user = req.user;
+  const { ideaId } = req.params;
+
+  await WatchlistService.removeFromWatchlist(user.userId, ideaId as string);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: WatchlistMessage.REMOVED,
+  });
+});
+
 export const WatchlistController = {
   addToWatchlist,
+  removeFromWatchlist,
 
 };

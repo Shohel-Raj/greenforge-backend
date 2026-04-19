@@ -24,7 +24,35 @@ const addToWatchlist = async (userId: string, ideaId: string) => {
   }
 };
 
+// REMOVE
+const removeFromWatchlist = async (userId: string, ideaId: string) => {
+  const existing = await prisma.watchlist.findUnique({
+    where: {
+      userId_ideaId: {
+        userId,
+        ideaId,
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new AppError(status.NOT_FOUND, WatchlistMessage.NOT_FOUND);
+  }
+
+  await prisma.watchlist.delete({
+    where: {
+      userId_ideaId: {
+        userId,
+        ideaId,
+      },
+    },
+  });
+
+  return null;
+};
+
 export const WatchlistService = {
   addToWatchlist,
+  removeFromWatchlist,
 
 };
