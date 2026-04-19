@@ -37,8 +37,24 @@ const removeFromWatchlist = nextRes(async (req: Request, res: Response) => {
   });
 });
 
+//  GET
+const getMyWatchlist = nextRes(async (req: Request, res: Response) => {
+  const user = req.user;
+
+  const result = await WatchlistService.getMyWatchlist(user.userId);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: WatchlistMessage.FETCHED,
+    data: result,
+  });
+});
+
+
+
 export const WatchlistController = {
   addToWatchlist,
   removeFromWatchlist,
-
+  getMyWatchlist,
 };

@@ -51,8 +51,26 @@ const removeFromWatchlist = async (userId: string, ideaId: string) => {
   return null;
 };
 
+//  GET ALL
+const getMyWatchlist = async (userId: string) => {
+  return prisma.watchlist.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      idea: {
+        include: {
+          category: true,
+          member: false,
+        },
+      },
+    },
+  });
+};
+
+
+
 export const WatchlistService = {
   addToWatchlist,
   removeFromWatchlist,
-
+  getMyWatchlist,
 };

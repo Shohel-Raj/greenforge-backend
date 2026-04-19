@@ -22,6 +22,12 @@ router.delete(
   WatchlistController.removeFromWatchlist
 );
 
+// GET MY LIST
+router.get(
+  "/my",
+  verifyAuthToken(Role.MEMBER),
+  WatchlistController.getMyWatchlist
+);
 
 
 export const WatchlistRoutes = router;
