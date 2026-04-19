@@ -51,10 +51,27 @@ const getMyWatchlist = nextRes(async (req: Request, res: Response) => {
   });
 });
 
+//  CHECK
+const checkWatchlist = nextRes(async (req: Request, res: Response) => {
+  const user = req.user;
+  const { ideaId } = req.params;
 
+  const result = await WatchlistService.checkWatchlist(
+    user.userId,
+    ideaId as string
+  );
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: WatchlistMessage.CHECKED,
+    data: result,
+  });
+});
 
 export const WatchlistController = {
   addToWatchlist,
   removeFromWatchlist,
   getMyWatchlist,
+  checkWatchlist,
 };

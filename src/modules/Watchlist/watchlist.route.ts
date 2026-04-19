@@ -29,5 +29,11 @@ router.get(
   WatchlistController.getMyWatchlist
 );
 
+//  CHECK
+router.get(
+  "/check/:ideaId",
+  verifyAuthToken(Role.MEMBER),
+  WatchlistController.checkWatchlist
+);
 
 export const WatchlistRoutes = router;

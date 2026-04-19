@@ -67,10 +67,23 @@ const getMyWatchlist = async (userId: string) => {
   });
 };
 
+//  CHECK
+const checkWatchlist = async (userId: string, ideaId: string) => {
+  const item = await prisma.watchlist.findUnique({
+    where: {
+      userId_ideaId: {
+        userId,
+        ideaId,
+      },
+    },
+  });
 
+  return { isSaved: !!item };
+};
 
 export const WatchlistService = {
   addToWatchlist,
   removeFromWatchlist,
   getMyWatchlist,
+  checkWatchlist,
 };
