@@ -1,3 +1,6 @@
-export const NewsletterSearchableFields = [
-    // Add searchable fields here
-    ];
+export const NewsletterMessage = {
+  SUBSCRIBED: "Subscribed successfully",
+  ALREADY_SUBSCRIBED: "Email already subscribed",
+  FETCHED: "Newsletter list fetched",
+  DELETED: "Unsubscribed successfully",
+};

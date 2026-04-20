@@ -1,6 +1,5 @@
-import { MAX_UPLOAD_SIZE } from '../../constants';
-// import { z } from 'zod';
+import { z } from "zod";
 
-export const newsletterValidationSchema = {
-    // Add validation schemas here
-    };
+export const subscribeNewsletterValidation = z.object({
+    email: z.string().trim().toLowerCase().email(),
+});

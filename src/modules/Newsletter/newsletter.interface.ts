@@ -1,3 +1,3 @@
-export type TNewsletter = {
-    // Add interface properties here
-    };
+import { Newsletter } from "../../generated/prisma/client";
+
+export type INewsletter = Newsletter;
