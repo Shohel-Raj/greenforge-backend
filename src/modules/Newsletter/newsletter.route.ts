@@ -14,6 +14,18 @@ router.post(
   NewsletterController.subscribe
 );
 
+//  ADMIN: GET ALL SUBSCRIBERS
+router.get(
+  "/",
+  verifyAuthToken(Role.ADMIN),
+  NewsletterController.getAll
+);
 
+//  ADMIN: DELETE / UNSUBSCRIBE
+router.delete(
+  "/:id",
+  verifyAuthToken(Role.ADMIN),
+  NewsletterController.remove
+);
 
 export const NewsletterRoutes = router;

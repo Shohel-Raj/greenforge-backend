@@ -19,8 +19,33 @@ const subscribe = nextRes(async (req: Request, res: Response) => {
   });
 });
 
+//  GET ALL
+const getAll = nextRes(async (_req: Request, res: Response) => {
+  const result = await NewsletterService.getAll();
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: NewsletterMessage.FETCHED,
+    data: result,
+  });
+});
+
+//  DELETE
+const remove = nextRes(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  await NewsletterService.remove(id as string);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: NewsletterMessage.DELETED,
+  });
+});
 
 export const NewsletterController = {
   subscribe,
-
+  getAll,
+  remove,
 };

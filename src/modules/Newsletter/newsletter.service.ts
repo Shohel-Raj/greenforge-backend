@@ -19,8 +19,32 @@ const subscribe = async (email: string) => {
   }
 };
 
+//  GET ALL (Admin use)
+const getAll = async () => {
+  return prisma.newsletter.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+};
+
+// DELETE / UNSUBSCRIBE
+const remove = async (id: string) => {
+  const existing = await prisma.newsletter.findUnique({
+    where: { id },
+  });
+
+  if (!existing) {
+    throw new AppError(status.NOT_FOUND, "Subscription not found");
+  }
+
+  await prisma.newsletter.delete({
+    where: { id },
+  });
+
+  return null;
+};
 
 export const NewsletterService = {
   subscribe,
- 
+  getAll,
+  remove,
 };
