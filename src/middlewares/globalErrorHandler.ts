@@ -6,6 +6,7 @@ import { envFile } from "../config/env";
 import AppError from "../errors/AppError";
 import { TErrorResponse, TErrorSources } from "./error.interface";
 import { deleteFileFromCloudinary } from "../config/cloudinary.config";
+import { handleZodError } from "../errors/handleZodError";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const globalErrorHandler = async (
@@ -32,7 +33,15 @@ export const globalErrorHandler = async (
   let message: string = "Internal Server Error";
   let stack: string | undefined = undefined;
 
-  if (err instanceof AppError) {
+
+
+  if (err instanceof z.ZodError) {
+    const simplifiedError = handleZodError(err);
+    statusCode = simplifiedError.statusCode as number;
+    message = simplifiedError.message;
+    errorSources = [...simplifiedError.errorSources];
+    stack = err.stack;
+  } else if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
     stack = err.stack;
@@ -41,7 +50,7 @@ export const globalErrorHandler = async (
         path: "",
         message: err.message,
       },
-    ];
+    ]
   } else if (err instanceof Error) {
     statusCode = status.INTERNAL_SERVER_ERROR;
     message = err.message;
