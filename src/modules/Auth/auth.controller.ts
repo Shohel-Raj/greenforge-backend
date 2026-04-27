@@ -167,6 +167,19 @@ const getNewToken = nextRes(
         });
     }
 )
+const forgetPassword = nextRes(
+    async (req: Request, res: Response) => {
+        const { email } = req.body;
+        await AuthService.forgetPassword(email);
+
+        sendResponse(res, {
+            httpStatusCode: status.OK,
+            success: true,
+            message: "Password reset OTP sent to email successfully",
+        });
+    }
+)
+
 export const AuthController={
     registerMember,
     loginUser,
@@ -174,5 +187,6 @@ export const AuthController={
     getMe,
     changePassword,
     logoutUser,
-    getNewToken
+    getNewToken,
+    forgetPassword,
 }
