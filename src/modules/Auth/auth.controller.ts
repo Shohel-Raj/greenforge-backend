@@ -180,6 +180,18 @@ const forgetPassword = nextRes(
     }
 )
 
+const resetPassword = nextRes(
+    async (req: Request, res: Response) => {
+        const { email, otp, newPassword } = req.body;
+        await AuthService.resetPassword(email, otp, newPassword);
+
+        sendResponse(res, {
+            httpStatusCode: status.OK,
+            success: true,
+            message: "Password reset successfully",
+        });
+    }
+)
 export const AuthController={
     registerMember,
     loginUser,
@@ -189,4 +201,5 @@ export const AuthController={
     logoutUser,
     getNewToken,
     forgetPassword,
+    resetPassword,
 }

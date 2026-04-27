@@ -17,5 +17,6 @@ router.post("/logout", verifyAuthToken(Role.ADMIN,Role.MEMBER), AuthController.l
 router.post("/refresh-token", AuthController.getNewToken)
 
 router.post("/forget-password", AuthController.forgetPassword)
+router.post("/reset-password", AuthController.resetPassword)
 
 export const AuthRoutes = router;
